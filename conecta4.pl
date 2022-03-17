@@ -1,32 +1,11 @@
 
-%jugar:- iniciarTablero(X), mostrar(X) !.
-
-%iniciarTablero(tablero([' ',' ',' ',' ',' ',' ',' '],
-    %                   [' ',' ',' ',' ',' ',' ',' '],
-   %                    [' ',' ',' ',' ',' ',' ',' '],
-  %                     [' ',' ',' ',' ',' ',' ',' '],
- %                      [' ',' ',' ',' ',' ',' ',' '],
-%                       [' ',' ',' ',' ',' ',' ',' '])).
-
-%mostrar(tablero):- print(' A B C D E F G' ), nl,
-%           escribirFila(tablero, 6).
-
-%escribirFila('_',0).
-%escribirFila(X,N):- escribirFila(X2, N),
-%                    Nn is N-1,
-
-
-%mostrar(tablero).
-
-
-
 jugar:- generar_tablero_inicial(L), escribir_tablero(L), jugando('X', L), !.
 
 %%jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
 %%jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
 %%jugando(_, L) :- completo(L), write('Empate').
-jugando('X', L) :- pedir_input(C), write(C), nl, escribir_tablero(L), jugando('O', L).
-jugando('O', L) :- pedir_input(C), write(C), nl, escribir_tablero(L), jugando('X', L).
+jugando('X', L) :- pedir_input(C), jugar_columna('X', C, L, L2), escribir_tablero(L2), jugando('O', L2).
+jugando('O', L) :- pedir_input(C), jugar_columna('O', C, L, L2), escribir_tablero(L2), jugando('X', L2).
 
 %% VICTORIAS %%
 
@@ -48,7 +27,7 @@ escribir_lista_con_barra([X|Y]):-
     write(X), write('|'),
     escribir_lista_con_barra(Y).
 
-% imprime el n de columna en la cabecera 
+% imprime el n de columna en la cabecera
 escribir_tablero(L):-
     escribir_lista([' ', 1,' ', 2,' ', 3,' ', 4,' ', 5,' ', 6, ' ', 7]), nl,
     escribir_tablero1(L).
@@ -75,9 +54,27 @@ col(4).
 col(5).
 col(6).
 
-
 %%colocar(P, C, L, L1) :-
 %%introducir_ficha(Col,Ficha,TOld,TNew):-
-    
+
     %%%validacion.
+
+transpose([[]|_], []) :- !.
+transpose([[I|Is]|Rs], [Col|MT]) :-
+    first_column([[I|Is]|Rs], Col, [Is|NRs]),
+    transpose([Is|NRs], MT).
+
+first_column([], [], []).
+first_column([[]|_], [], []).
+first_column([[I|Is]|Rs], [I|Col], [Is|Rest]) :-
+    first_column(Rs, Col, Rest).
+
+jugar_columna(P, N, L, L3) :- transpose(L, L1), append(I, [C|F], L1),
+                                length(I, N), colocar_ficha(P, C, C2), append(I, [C2|F], L2), transpose(L2, L3).
+
+colocar_ficha(P, [' '], [P]) :- !.
+colocar_ficha(P, [' ',A|F], [P,A|F]) :- A \== (' '), !.
+colocar_ficha(P, [' '|F1], [' '|F2]) :- colocar_ficha(P, F1, F2).
+
+prueba :- generar_tablero_inicial(L), transpose(L, L1), append(I, [C|F], L1), length(I, 1), write(I), nl, write(C), nl, write(F).
 
