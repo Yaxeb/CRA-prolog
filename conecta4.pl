@@ -1,15 +1,39 @@
 
 jugar:- generar_tablero_inicial(L), escribir_tablero(L), jugando('X', L), !.
 
-%%jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
-%%jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
+jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
+jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
 %%jugando(_, L) :- completo(L), write('Empate').
-jugando('X', L) :- pedir_input(C), jugar_columna('X', C, L, L2), escribir_tablero(L2), jugando('O', L2).
-jugando('O', L) :- pedir_input(C), jugar_columna('O', C, L, L2), escribir_tablero(L2), jugando('X', L2).
+jugando('X', L) :- repeat,pedir_input(C), jugar_columna('X', C, L, L2),!, escribir_tablero(L2), jugando('O', L2).
+jugando('O', L) :- repeat,pedir_input(C), jugar_columna('O', C, L, L2),!,escribir_tablero(L2), jugando('X', L2).
 
 %% VICTORIAS %%
 
-%%%% código del profe:
+% comprobacion de las columnas
+ganador(P, L) :- append(_, [C|_], L),
+                 append(_, [P,P,P,P|_], C). % selecciona 4 elementos iguales de la columna 
+% comprobacion de las filas
+ganador(P, L) :- transpose(L, L1),
+                 append(_, [C|_], L1),
+                 append(_, [P,P,P,P|_], C).
+
+% comprobando la diagonal de la forma \
+ganador(P, L) :- append(_,[C1,C2,C3,C4|_],L),
+                 append(I1, [P|_], C1),
+                 append(I2, [P|_], C2),
+                 append(I3, [P|_], C3),
+                 append(I4, [P|_], C4),
+                 length(I1,M1), length(I2,M2), length(I3,M3), length(I4,M4),
+                 M2 is M1+1, M3 is M2+1, M4 is M3+1. 
+
+% comprobando la diagonal de la forma /
+ganador(P, L) :- append(_,[C1,C2,C3,C4|_],L),
+                 append(I1, [P|_], C1),
+                 append(I2, [P|_], C2),
+                 append(I3, [P|_], C3),
+                 append(I4, [P|_], C4),
+                 length(I1,M1), length(I2,M2), length(I3,M3), length(I4,M4),
+                 M2 is M1-1, M3 is M2-1, M4 is M3-1. 
 
 lista_repe(1,X,[X]).
 lista_repe(N,X,[X|L]):- N1 is N-1, lista_repe(N1,X,L).
@@ -69,9 +93,10 @@ first_column([[]|_], [], []).
 first_column([[I|Is]|Rs], [I|Col], [Is|Rest]) :-
     first_column(Rs, Col, Rest).
 
+
 jugar_columna(P, N, L, L3) :- transpose(L, L1), append(I, [C|F], L1),
                                 length(I, N), colocar_ficha(P, C, C2), append(I, [C2|F], L2), transpose(L2, L3).
-
+                                
 colocar_ficha(P, [' '], [P]) :- !.
 colocar_ficha(P, [' ',A|F], [P,A|F]) :- A \== (' '), !.
 colocar_ficha(P, [' '|F1], [' '|F2]) :- colocar_ficha(P, F1, F2).
