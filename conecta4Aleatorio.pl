@@ -3,7 +3,7 @@ jugar:- generar_tablero_inicial(L), escribir_tablero(L), jugando('X', L), !.
 
 jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
 jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
-%%jugando(_, L) :- completo(L), write('Empate').
+%%jugando(_, L) :- nocompleto(L), write('Empate').
 jugando('X', L) :- repeat,pedir_input(C), jugar_columna('X', C, L, L2),!, escribir_tablero(L2), jugando('O', L2).
 jugando('O', L) :- repeat,random(0,7,C), jugar_columna('O', C, L, L2),!,escribir_tablero(L2), jugando('X', L2).
 
@@ -100,5 +100,3 @@ jugar_columna(P, N, L, L3) :- transpose(L, L1), append(I, [C|F], L1),
 colocar_ficha(P, [' '], [P]) :- !.
 colocar_ficha(P, [' ',A|F], [P,A|F]) :- A \== (' '), !.
 colocar_ficha(P, [' '|F1], [' '|F2]) :- colocar_ficha(P, F1, F2).
-
-prueba :- generar_tablero_inicial(L), transpose(L, L1), append(I, [C|F], L1), length(I, 1), write(I), nl, write(C), nl, write(F).

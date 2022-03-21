@@ -1,13 +1,48 @@
 
 jugar:- generar_tablero_inicial(L), escribir_tablero(L), jugando('X', L), !.
 
-%%jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
-%%jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
-jugando(_, L) :- \+ nocompleto(L), write('Empate').
+jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
+jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
+%%jugando(_, L) :- completo(L), write('Empate').
 jugando('X', L) :- repeat,pedir_input(C), jugar_columna('X', C, L, L2),!, escribir_tablero(L2), jugando('O', L2).
-jugando('O', L) :- repeat,pedir_input(C), jugar_columna('O', C, L, L2),!,escribir_tablero(L2), jugando('X', L2).
+jugando('O', L) :- repeat,random(0,7,C), jugar_columna('O', C, L, L2),!,escribir_tablero(L2), jugando('X', L2).
 
 %% VICTORIAS %%
+
+%%comprueba si puede ganar en columna.
+jugando('O', L) :- append(_, [C|_], L),
+                   append(_,[' ','O','O','O'|_],C),
+                   jugar_columna('O',C,L,L2),!,
+                   escribir_tablero(L2), jugando('X', L2).
+                   
+subst(This, That, MyStr, Result) :-
+    append(This, After, Rest),
+    append(Before, Rest, MyStr),
+    !,
+    subst(This, That, After, AfterResult),
+    append([Before,That,AfterResult], Result).
+
+prueba :- append(_,['X','X',' ','X'|L1]), append(_,['X','X','X','X'|L2]), subst(L1,)
+
+    %%? subst(`this`,`that`,`athishellothis`,R).
+%%R = `athathellothat`.
+
+colocar_ficha(C, [' '], [P]) :- !.
+colocar_ficha(C, [' ',A|F], ['O',A|F]) :- A \== (' '), !.
+colocar_ficha(C, [' '|F1], [' '|F2]) :- colocar_ficha(P, F1, F2).
+
+
+
+%%comprueba si puede ganar en fila.   1 2 3 4 5 6 7 8 9   ->    p1 [1 2 | 6 9] p2 3 4 -> p1 1 2 6 9 5 6 7 8 9
+jugando('O', L) :- transpose(L,L1)
+                   append(_, [C|_], L1),
+                   append(P1,[' ','O','O','O'|_],P2),metesficha(0) ;append(_,['O','O','O',' '|_],C),metesficha;
+                   append(_,['O',' ','O','O'|_],C),metesficha ;append(_,['O','O',' ','O'|_],C), metesficha(2), 
+                   jugar_columna('O',C,L1,L2),!,
+                   transpose(L2,L3),
+                   escribir_tablero(L3), jugando('X', L3).
+
+
 
 % comprobacion de las columnas
 ganador(P, L) :- append(_, [C|_], L),
@@ -34,8 +69,6 @@ ganador(P, L) :- append(_,[C1,C2,C3,C4|_],L),
                  append(I4, [P|_], C4),
                  length(I1,M1), length(I2,M2), length(I3,M3), length(I4,M4),
                  M2 is M1-1, M3 is M2-1, M4 is M3-1. 
-
-nocompleto(L) :-  (append(_,[' '|_],C)).
 
 lista_repe(1,X,[X]).
 lista_repe(N,X,[X|L]):- N1 is N-1, lista_repe(N1,X,L).
