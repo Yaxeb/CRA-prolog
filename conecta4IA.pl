@@ -3,46 +3,27 @@ jugar:- generar_tablero_inicial(L), escribir_tablero(L), jugando('X', L), !.
 
 jugando('X', L) :- ganador('O', L), write('Gana jugador 2').
 jugando('O', L) :- ganador('X', L), write('Gana jugador 1').
-%%jugando(_, L) :- completo(L), write('Empate').
+jugando(_, L) :- \+ nocompleto(L), write('Empate').
 jugando('X', L) :- repeat,pedir_input(C), jugar_columna('X', C, L, L2),!, escribir_tablero(L2), jugando('O', L2).
-jugando('O', L) :- repeat,random(0,7,C), jugar_columna('O', C, L, L2),!,escribir_tablero(L2), jugando('X', L2).
+jugando('O', L) :- maquina('O', 'X', L, L2), escribir_tablero(L2), jugando('X', L2).
+
+
+nocompleto(L):-  append(_,[C|_],L),
+append(_,[' '|_],C),!.
 
 %% VICTORIAS %%
 
-%%comprueba si puede ganar en columna.
-jugando('O', L) :- append(_, [C|_], L),
-                   append(_,[' ','O','O','O'|_],C),
-                   jugar_columna('O',C,L,L2),!,
-                   escribir_tablero(L2), jugando('X', L2).
-                   
-subst(This, That, MyStr, Result) :-
-    append(This, After, Rest),
-    append(Before, Rest, MyStr),
-    !,
-    subst(This, That, After, AfterResult),
-    append([Before,That,AfterResult], Result).
+%%si puede ganar, gana.
+maquina(P,_,L,L2) :- algoritmo(P,L,C,L2), write("maquina: "), write(C), nl, !.
 
-prueba :- append(_,['X','X',' ','X'|L1]), append(_,['X','X','X','X'|L2]), subst(L1,)
+%%si el rival puede ganar, le bloquea
+maquina(P,X,L,L2) :- findall((Col,TA), (algoritmo(X,L,_,_), col(Col), jugar_columna(P,Col,L,TA),\+ algoritmo(X,TA,_,_)), [(C,L2)|_]), write("maquina: "), write(C), nl, !.
 
-    %%? subst(`this`,`that`,`athishellothis`,R).
-%%R = `athathellothat`.
-
-colocar_ficha(C, [' '], [P]) :- !.
-colocar_ficha(C, [' ',A|F], ['O',A|F]) :- A \== (' '), !.
-colocar_ficha(C, [' '|F1], [' '|F2]) :- colocar_ficha(P, F1, F2).
+%%jugar random
+maquina(P,_,L,L2) :- repeat,random(0,7,C), jugar_columna(P, C, L, L2), write("maquina: "), write(C), nl.
 
 
-
-%%comprueba si puede ganar en fila.   1 2 3 4 5 6 7 8 9   ->    p1 [1 2 | 6 9] p2 3 4 -> p1 1 2 6 9 5 6 7 8 9
-jugando('O', L) :- transpose(L,L1)
-                   append(_, [C|_], L1),
-                   append(P1,[' ','O','O','O'|_],P2),metesficha(0) ;append(_,['O','O','O',' '|_],C),metesficha;
-                   append(_,['O',' ','O','O'|_],C),metesficha ;append(_,['O','O',' ','O'|_],C), metesficha(2), 
-                   jugar_columna('O',C,L1,L2),!,
-                   transpose(L2,L3),
-                   escribir_tablero(L3), jugando('X', L3).
-
-
+algoritmo(P,L,C,L2) :- findall((Col,TA), (col(Col), jugar_columna(P,Col,L,TA), ganador(P,TA)), [(C,L2)|_]).
 
 % comprobacion de las columnas
 ganador(P, L) :- append(_, [C|_], L),
@@ -113,10 +94,7 @@ col(4).
 col(5).
 col(6).
 
-%%colocar(P, C, L, L1) :-
-%%introducir_ficha(Col,Ficha,TOld,TNew):-
 
-    %%%validacion.
 
 transpose([[]|_], []) :- !.
 transpose([[I|Is]|Rs], [Col|MT]) :-
