@@ -12,6 +12,7 @@ jugando('O', L) :- maquina('O', 'X', L, L2), escribir_tablero(L2), jugando('X', 
 
 suma :- nb_getval(contador, C), CNew is C + 1, nb_setval(contador, CNew).
 
+%%comprueba si el tablero no está completo
 nocompleto(L):-  append(_,[C|_],L),
 append(_,[' '|_],C),!.
 
